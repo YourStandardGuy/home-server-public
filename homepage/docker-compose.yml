@@ -1,0 +1,32 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:v2.2.0
+    container_name: homepage
+    labels:
+      - wud.trigger.include=dockercompose.auto
+      - wud.tag.include=^v\d+\.\d+\.\d+$
+    ports:
+      - 100.105.29.96:3000:3000
+    volumes:
+      - /home/erik/docker/homepage/config:/app/config
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: "homeserver:3000,100.105.29.96:3000,192.168.0.100:3000,127.0.0.1"
+    env_file: .env
+    networks:
+      - wud-net
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+networks:
+  wud-net:
+    external: true

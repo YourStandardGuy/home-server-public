@@ -1,0 +1,68 @@
+services:
+  portainer:
+    image: portainer/portainer-ce:2.45.0
+    container_name: portainer
+    command:
+      - '--host'
+      - 'tcp://portainer-proxy:2375'
+    labels:
+      - wud.trigger.include=dockercompose.auto
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    restart: unless-stopped
+    ports:
+      - "100.105.29.96:9443:9443"
+    volumes:
+      - portainer_data:/data
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp
+    networks:
+      - portainer-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  portainer-proxy:
+    image: linuxserver/socket-proxy:3.4.4
+    container_name: portainer-proxy
+    labels:
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    restart: unless-stopped
+    environment:
+      - CONTAINERS=1
+      - ALLOW_START=1
+      - ALLOW_STOP=1
+      - ALLOW_RESTARTS=1
+      - IMAGES=1
+      - EVENTS=1
+      - INFO=1
+      - NETWORKS=1
+      - VOLUMES=1
+      - PING=1
+      - VERSION=1
+      - LOG_LEVEL=info
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    read_only: true
+    tmpfs:
+      - /run
+    networks:
+      - portainer-net
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+
+volumes:
+  portainer_data:
+    driver: local
+
+networks:
+  portainer-net:
+    name: portainer-net
+    driver: bridge

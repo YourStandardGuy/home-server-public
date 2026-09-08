@@ -1,0 +1,57 @@
+services:
+  netdata:
+    image: netdata/netdata:v2.11.0
+    container_name: netdata
+    labels:
+      - wud.trigger.include=dockercompose.auto
+      - wud.tag.include=^v\d+\.\d+\.\d+$
+    hostname: homeserver
+    restart: unless-stopped
+    pid: host
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor=unconfined
+    ports:
+      - 100.105.29.96:19999:19999
+    volumes:
+      - netdataconfig:/etc/netdata
+      - ./netdata.conf:/etc/netdata/netdata.conf:ro
+      - ./go.d.conf:/etc/netdata/go.d.conf:ro
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /:/host/root:ro,rslave
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/log:/host/var/log:ro
+      # Docker socket ersatt av proxy
+      - /home/erik/docker/socket-proxy/sock:/sock:ro
+      - /run/dbus:/run/dbus:ro
+    environment:
+      DOCKER_HOST: unix:///sock/proxy.sock
+    networks:
+      - netdata-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "netdatacli", "ping"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
+
+networks:
+  netdata-net:
+    name: netdata-net
+    driver: bridge

@@ -1,0 +1,29 @@
+services:
+  nextcloud-aio-mastercontainer:
+    image: ghcr.io/nextcloud-releases/all-in-one:latest
+    init: true
+    restart: always
+    container_name: nextcloud-aio-mastercontainer
+    volumes:
+      - nextcloud_aio_mastercontainer:/mnt/docker-aio-config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /srv/nextcloud-external:/srv/nextcloud-external
+    ports:
+      # AIO interface — för initial setup + admin. Nås via SSH-tunnel.
+      - 127.0.0.1:8080:8080
+      # Port 11000 där Apache/Nextcloud exponeras internt
+      # (exponeras inte externt — Tailscale Serve proxar dit)
+    environment:
+      APACHE_PORT: 11000
+      APACHE_IP_BINDING: 100.105.29.96
+      NEXTCLOUD_DATADIR: /mnt/storage/nextcloud-data
+      NEXTCLOUD_MOUNT: /srv/nextcloud-external
+      NEXTCLOUD_UPLOAD_LIMIT: 16G
+      NEXTCLOUD_MEMORY_LIMIT: 512M
+      SKIP_DOMAIN_VALIDATION: true
+      NEXTCLOUD_STARTUP_APPS: "deck twofactor_totp tasks calendar contacts notes"
+
+
+volumes:
+  nextcloud_aio_mastercontainer:
+    name: nextcloud_aio_mastercontainer

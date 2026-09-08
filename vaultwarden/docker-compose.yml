@@ -1,0 +1,40 @@
+services:
+  vaultwarden:
+    image: vaultwarden/server:1.37.2
+    container_name: vaultwarden
+    labels:
+      - wud.trigger.include=dockercompose.auto
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    restart: unless-stopped
+    user: "1000:1000"
+    environment:
+      DOMAIN: "https://homeserver.tail042c01.ts.net:8443"
+      SIGNUPS_ALLOWED: "false"
+      TZ: "Europe/Stockholm"
+    volumes:
+      - ./vw-data/:/data/
+    ports:
+      - 127.0.0.1:8082:80
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - vaultwarden-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/alive"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+networks:
+  vaultwarden-net:
+    name: vaultwarden-net
+    driver: bridge

@@ -1,0 +1,27 @@
+services:
+  socket-proxy:
+    image: ghcr.io/wollomatic/socket-proxy:1.13.1
+    container_name: socket-proxy
+    labels:
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    restart: unless-stopped
+    network_mode: none
+    user: "65534:983"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /home/erik/docker/socket-proxy/sock:/sock
+    command:
+      - '-loglevel=info'
+      - '-proxysocketendpoint=/sock/proxy.sock'
+      - '-proxysocketendpointfilemode=0666'
+      - '-allowGET=(/v1\\..{1,2})?/(containers/json|containers/[^/]+/json|containers/[^/]+/stats|images/.+/json|images/json|events|info|version|_ping)'
+      - '-allowHEAD=/(_ping|version)'
+    deploy:
+      resources:
+        limits:
+          memory: 64M

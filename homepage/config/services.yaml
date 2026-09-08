@@ -1,0 +1,147 @@
+# See https://gethomepage.dev/configs/services/
+
+- Network:
+    - Pi-hole:
+        icon: pi-hole
+        href: http://homeserver/admin
+        description: DNS ad blocker
+        widget:
+          type: pihole
+          url: http://100.105.29.96:80
+          version: 6
+          key: "{{HOMEPAGE_VAR_PIHOLE_KEY}}"
+
+    - ProtonVPN:
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons/svg/proton-vpn.svg
+        href: https://account.protonvpn.com
+        description: VPN-konto
+
+    - Tailscale:
+        icon: tailscale
+        href: https://login.tailscale.com/admin/machines
+        description: Tailscale admin
+
+    - The Lounge:
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons/svg/the-lounge.svg
+        href: http://100.105.29.96:9000
+        description: Web IRC-klient
+
+- Applications:
+    - Vaultwarden:
+        icon: vaultwarden
+        href: https://homeserver.tail042c01.ts.net:8443
+        description: Password manager
+
+    - Nextcloud:
+        icon: nextcloud
+        href: https://homeserver.tail042c01.ts.net
+        description: File sync & collaboration
+
+    - AIO:
+        icon: nextcloud
+        href: https://homeserver.tail042c01.ts.net:8444
+        description: Admin interface
+
+    - Orion:
+        icon: https://hermes-agent.nousresearch.com/favicon.ico
+        href: https://t.me/OrionHomeServerBot
+        description: Telegram
+
+    - Immich:
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons/svg/immich.svg
+        href: http://100.105.29.96:2283
+        description: Photos
+
+- Media:
+    - qBittorrent:
+        icon: qbittorrent
+        href: http://100.105.29.96:8081
+        description: Torrent client
+
+    - autobrr:
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons/svg/autobrr.svg
+        href: http://100.105.29.96:7474
+        description: IRC/RSS-grabbning
+
+    - qbitmanage:
+        icon: https://cdn.jsdelivr.net/gh/stuffanthings/qbit_manage@master/web-ui/img/qbm_logo.png
+        href: http://100.105.29.96:8181
+        description: qBittorrent manager
+
+    - Prowlarr:
+        icon: prowlarr
+        href: http://100.105.29.96:9696
+        description: Indexer manager
+
+    - Sonarr:
+        icon: sonarr
+        href: http://100.105.29.96:8989
+        description: TV series manager
+
+    - Radarr:
+        icon: radarr
+        href: http://100.105.29.96:7878
+        description: Movie manager
+
+    - Bazarr:
+        icon: bazarr
+        href: http://100.105.29.96:6767
+        description: Subtitle manager
+
+    - Jellyfin:
+        icon: jellyfin
+        href: https://jellyfin.tail042c01.ts.net
+        description: Media server
+
+    - Seerr:
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons/svg/seerr.svg
+        href: https://seerr.tail042c01.ts.net
+        description: Request manager
+
+- System:
+    - Uptime Kuma:
+        icon: uptime-kuma
+        href: http://100.105.29.96:3002
+        description: Uptime monitoring
+        widget:
+          type: uptimekuma
+          url: http://100.105.29.96:3002
+          slug: homeserver
+
+    - Portainer:
+        icon: portainer
+        href: https://100.105.29.96:9443
+        description: Docker management UI
+
+    - WUD:
+        icon: https://cdn.jsdelivr.net/gh/selfhst/icons/svg/wud.svg
+        href: http://100.105.29.96:3001
+        description: Container update monitor
+        widget:
+          type: whatsupdocker
+          url: http://wud:3000
+
+    - RAM Cleanup:
+        icon: https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/memory.svg
+        href: http://100.105.29.96:9999/clean-ram
+        description: Kill bash, Hermes CLI, and orphaned SSH login sessions
+        target: _blank
+        widget:
+          type: customapi
+          url: http://100.105.29.96:9999/count
+          mappings:
+            - field: count
+              label: "Killable processes"
+              format: number
+            - field: freed_mb
+              label: "Freeable space"
+              format: number
+              suffix: "MB"
+
+    - Netdata:
+        icon: netdata
+        href: http://100.105.29.96:19999/v3/
+        description: Container monitoring
+        widget:
+          type: netdata
+          url: http://100.105.29.96:19999

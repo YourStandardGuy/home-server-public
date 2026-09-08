@@ -1,0 +1,44 @@
+services:
+  wud:
+    image: getwud/wud:8.3.1
+    container_name: wud
+    user: "1000:983"
+    labels:
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/erik/docker:/home/erik/docker:rw
+      - ./data:/store
+    ports:
+      - 100.105.29.96:3001:3000
+    environment:
+      - WUD_WATCHER_LOCAL_SOCKET=/var/run/docker.sock
+      - WUD_WATCHER_LOCAL_CRON=0 */6 * * *
+      - WUD_TRIGGER_DOCKERCOMPOSE_AUTO_THRESHOLD=patch
+      - WUD_TRIGGER_DOCKERCOMPOSE_AUTO_BACKUP=true
+      - WUD_TRIGGER_DOCKERCOMPOSE_AUTO_PRUNE=true
+      - WUD_TRIGGER_DOCKERCOMPOSE_AUTO_INCLUDEBYDEFAULT=false
+      # Manual docker-compose-trigger: klick-driven uppdatering för alla containrar (aldrig auto)
+      - WUD_TRIGGER_DOCKERCOMPOSE_MANUAL_AUTO=false
+      - WUD_TRIGGER_DOCKERCOMPOSE_MANUAL_BACKUP=true
+      - WUD_TRIGGER_DOCKERCOMPOSE_MANUAL_PRUNE=true
+    env_file: .env
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    networks:
+      - wud-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+networks:
+  wud-net:
+    name: wud-net
+    driver: bridge

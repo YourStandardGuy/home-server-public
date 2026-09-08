@@ -1,0 +1,2 @@
+# Docker integration disabled — all services are defined manually in services.yaml.
+# Keeping this file (empty) because Homepage treats docker.yaml as required config.

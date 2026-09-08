@@ -1,0 +1,239 @@
+services:
+  # ────────────────────────────────────────────
+  # The Lounge — webbaserad IRC-klient
+  # ────────────────────────────────────────────
+  thelounge:
+    image: ghcr.io/thelounge/thelounge:4.5.2
+    container_name: thelounge
+    ports:
+      - 100.105.29.96:${THELOUNGE_PORT}:${THELOUNGE_PORT}
+    networks:
+      - arr-net
+    volumes:
+      - ./config/thelounge:/var/opt/thelounge
+    restart: unless-stopped
+    labels:
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ────────────────────────────────────────────
+  # Indexer-manager — på vanliga nätet
+  # ────────────────────────────────────────────
+  prowlarr:
+    image: linuxserver/prowlarr:2.5.2
+    container_name: prowlarr
+    labels:
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    volumes:
+      - ./config/prowlarr:/config
+    ports:
+      - 100.105.29.96:9696:9696
+    restart: unless-stopped
+    networks:
+      - arr-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ────────────────────────────────────────────
+  # TV-serier
+  # ────────────────────────────────────────────
+  sonarr:
+    image: linuxserver/sonarr:4.0.19
+    container_name: sonarr
+    labels:
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    volumes:
+      - ./config/sonarr:/config
+      - /mnt/data/media:/data    # ← ser ALLT = hardlinks funkar
+    ports:
+      - 100.105.29.96:8989:8989
+    restart: unless-stopped
+    networks:
+      - arr-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ────────────────────────────────────────────
+  # Filmer
+  # ────────────────────────────────────────────
+  radarr:
+    image: linuxserver/radarr:6.3.0
+    container_name: radarr
+    labels:
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    volumes:
+      - ./config/radarr:/config
+      - /mnt/data/media:/data    # ← ser ALLT = hardlinks funkar
+    ports:
+      - 100.105.29.96:7878:7878
+    restart: unless-stopped
+    networks:
+      - arr-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ────────────────────────────────────────────
+  # Undertext-hantering — hämtar undertexter från Sonarr/Radarr
+  # ────────────────────────────────────────────
+  bazarr:
+    image: linuxserver/bazarr:1.6.0
+    container_name: bazarr
+    labels:
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - UMASK=${UMASK}
+    volumes:
+      - ./config/bazarr:/config
+      - /mnt/data/media:/data
+    ports:
+      - 100.105.29.96:6767:6767
+    restart: unless-stopped
+    networks:
+      - arr-net
+      - jellyfin-net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # ────────────────────────────────────────────
+  # Tailscale sidecar — Jellyfin på egen tailnet-identitet
+  # ────────────────────────────────────────────
+  jellyfin-ts:
+    image: tailscale/tailscale:v1.102.3
+    container_name: jellyfin-ts
+    labels:
+      - wud.tag.include=^v\d+\.\d+\.\d+$
+    hostname: jellyfin
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY_JELLYFIN}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_SERVE_CONFIG=/config/serve.json
+    volumes:
+      - ./config/tailscale-jellyfin/state:/var/lib/tailscale
+      - ./config/tailscale-jellyfin/serve.json:/config/serve.json:ro
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    restart: unless-stopped
+    networks:
+      - jellyfin-net
+
+  # ────────────────────────────────────────────
+  # Tailscale sidecar — Seerr på egen tailnet-identitet
+  # ────────────────────────────────────────────
+  seerr-ts:
+    image: tailscale/tailscale:v1.102.3
+    container_name: seerr-ts
+    labels:
+      - wud.tag.include=^v\d+\.\d+\.\d+$
+    hostname: seerr
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY_SEERR}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_SERVE_CONFIG=/config/serve.json
+    volumes:
+      - ./config/tailscale-seerr/state:/var/lib/tailscale
+      - ./config/tailscale-seerr/serve.json:/config/serve.json:ro
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    restart: unless-stopped
+    networks:
+      - jellyfin-net
+
+  # ────────────────────────────────────────────
+  # Mediaserver
+  # ────────────────────────────────────────────
+  jellyfin:
+    image: jellyfin/jellyfin:10.11.11
+    container_name: jellyfin
+    labels:
+      - wud.tag.include=^\d+\.\d+\.\d+$
+    user: "${PUID}:${PGID}"
+    runtime: nvidia
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ./config/jellyfin:/config
+      - ./config/jellyfin-cache:/cache
+      - /mnt/data/media/library:/data/media:ro
+    ports:
+      - 8096:8096
+    restart: unless-stopped
+    networks:
+      - jellyfin-net
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # ────────────────────────────────────────────
+  # Request-manager — användare beställer media här
+  # ────────────────────────────────────────────
+  seerr:
+    image: ghcr.io/seerr-team/seerr:v3.4.1
+    container_name: seerr
+    labels:
+      - wud.tag.include=^v\d+\.\d+\.\d+$
+    init: true
+    environment:
+      - TZ=${TZ}
+      - LOG_LEVEL=info
+      - PORT=5055
+    volumes:
+      - ./config/seerr:/app/config
+    ports:
+      - 5055:5055
+    restart: unless-stopped
+    networks:
+      - arr-net
+      - jellyfin-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+networks:
+  arr-net:
+    name: arr-net
+    driver: bridge
+  jellyfin-net:
+    name: jellyfin-net
+    driver: bridge

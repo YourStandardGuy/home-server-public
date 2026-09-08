@@ -1,0 +1,26 @@
+
+homepage/config/logs/
+.env
+pihole/dnscrypt-proxy/public-resolvers.md
+pihole/dnscrypt-proxy/public-resolvers.md.minisig
+pihole/etc-pihole/
+__pycache__/
+# Runtime data
+# Runtime data (risk for accidental git add)
+*.swp
+syncthing/config/index-v2/
+syncthing/config/*.lock
+syncthing/config/*.pem
+syncthing/config/*.v0
+# Syncthing runtime data
+vaultwarden/vw-data/
+# Immich
+immich/immich-go
+# Uptime Kuma runtime data
+uptimekuma/data/
+# WUD runtime data
+wud/data/
+# Update-scriptets logg
+update/update-stacks.log
+# WUD compose-backuper
+*.back

@@ -5,7 +5,7 @@ Public snapshot of my self-hosted home server Docker stack.
 > Reference snapshot — this repo is intentionally NOT kept up to date.
 > Configuration values live in local `.env` files (not included), and
 > volume mounts are specific to my server hardware.
-> CONFIG IS LEFT OUT FOR PRIVACY REASONS
+> CONFIG IS LEFT OUT FOR PRIVACY REASONS and
 > a few other cool applications had to be left out...
 
 ## Services
